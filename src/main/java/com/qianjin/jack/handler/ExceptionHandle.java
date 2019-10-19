@@ -1,10 +1,8 @@
 package com.qianjin.jack.handler;
 
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.qianjin.jack.domain.Result;
 import com.qianjin.jack.domain.ResultException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,9 +13,6 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
 @RestControllerAdvice
 @Slf4j
 public class ExceptionHandle extends DefaultHandlerExceptionResolver {
-
-    @Value("${prod.test}")
-    private String isTest;
 
 
     @ExceptionHandler(value = ResultException.class)
@@ -33,11 +28,6 @@ public class ExceptionHandle extends DefaultHandlerExceptionResolver {
 
     @ExceptionHandler(value = Exception.class)
     public Result Except(Exception e) {
-
-        if ("test".equals(isTest)) {
-            e.printStackTrace();
-            return new Result(-1, e.getMessage());
-        }
         if (e instanceof ResultException) {
             ResultException re = (ResultException) e;
             if (re.getCode() == 730) {

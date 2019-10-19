@@ -11,6 +11,9 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author volume
  * @date 2019/10/18 10:07
@@ -40,7 +43,13 @@ public class AppConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(loginIntercept).addPathPatterns("/**");
+        List<String> nologin = new ArrayList<>();
+        nologin.add("/");
+        nologin.add("/error");
+        nologin.add("/user/login");
+        nologin.add("/user/register");
+        nologin.add("/product/detail/product");
+        registry.addInterceptor(loginIntercept).addPathPatterns("/**").excludePathPatterns(nologin);
     }
 
 }

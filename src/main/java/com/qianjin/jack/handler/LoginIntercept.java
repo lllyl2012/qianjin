@@ -5,6 +5,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.qianjin.jack.domain.dao.UserInfo;
+import com.qianjin.jack.utils.JWTUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,8 +25,6 @@ import java.util.Map;
 @Component
 @Slf4j
 public class LoginIntercept implements HandlerInterceptor {
-    @Value("${yard}")
-    private String yard;
 
     public static ThreadLocal<UserInfo> userInfoLocal = new ThreadLocal<>();
 
@@ -36,7 +35,7 @@ public class LoginIntercept implements HandlerInterceptor {
             response.setStatus(401);
             return false;
         }
-        UserInfo userInfo = parseToken(authorization.substring(6));
+        UserInfo userInfo = JWTUtil.parseToken(authorization);
         userInfoLocal.set(userInfo);
         return true;
     }
@@ -46,13 +45,5 @@ public class LoginIntercept implements HandlerInterceptor {
         userInfoLocal.remove();
     }
 
-    private UserInfo parseToken(String authorization) throws Exception {
-        UserInfo userInfo = new UserInfo();
-        JWTVerifier verifier = JWT.require(Algorithm.HMAC256(yard)).build();
-        Map<String, Claim> claims = verifier.verify(authorization).getClaims();
-        userInfo.setId(claims.get("id").asInt());
-        userInfo.setUsername(claims.get("username").asString());
-        userInfo.setPhone(claims.get("phone").asString());
-        return userInfo;
-    }
+
 }
