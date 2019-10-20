@@ -9,6 +9,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.ArrayList;
@@ -49,7 +50,13 @@ public class AppConfig implements WebMvcConfigurer {
         nologin.add("/user/login");
         nologin.add("/user/register");
         nologin.add("/product/detail/product");
+        nologin.add("/manage/**");
         registry.addInterceptor(loginIntercept).addPathPatterns("/**").excludePathPatterns(nologin);
     }
 
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/manage/**").addResourceLocations("classpath:/static/");
+    }
 }

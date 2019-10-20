@@ -28,4 +28,11 @@ public class UserInfo extends CommonDao{
         this.username = username;
         this.password = password;
     }
+
+    public UserInfo(Integer id, String username, String phone, String password) {
+        this.id = id;
+        this.username = username;
+        this.phone = phone;
+        this.password = password;
+    }
 }

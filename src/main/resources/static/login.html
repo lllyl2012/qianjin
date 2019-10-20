@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.2/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="//cdn.bootcss.com/qs/6.5.2/qs.min.js"></script>
+</head>
+<body>
+<div id="app">
+    账号：<input type="text" name="username"  v-model="username" >
+    密码：<input type="password" name="password"  v-model="password" >
+    <button @click="getApiData">点击得到数据</button>
+</div>
+<script>
+    Vue.prototype.$http = axios;
+    // 实例化vue对象（MVVM中的View Model）
+    new Vue({
+        // vm控制的区块为id为app的div，此div中的所有vue指令均可以被vm解析
+        el:'#app',
+        data:{
+            // 数据 （MVVM中的Model）
+            username:"",
+            password:""
+        },
+        methods:{
+            getApiData:function() {
+                //设置请求路径
+                var url  = "/qj/user/login";
+                _this = this;
+                // 得到name属性对应的值
+                this.$http.post(url,window.Qs.stringify({"username":this.username,"password":this.password}),
+                    {
+                        headers: {
+                            'content-type': 'application/x-www-form-urlencoded; charset=utf-8'
+                        }
+                    }
+                ).then(function(res) {
+                    var resData = res.data;
+                    if(resData.result == "1") { //0表示成功，1表示失败
+                        localStorage.setItem('yy_token',resData.data)
+                        window.location.href = "/qj/manage/index.html"
+                    }else{
+                        alert("账号或密码错误");
+                    }
+                });
+            }
+        }
+    })
+</script>
+</body>
+</html>

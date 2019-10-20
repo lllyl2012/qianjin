@@ -11,7 +11,7 @@ public class PageResult<R> {
     private Long pageSize;
     private Long total;
     private Long a;
-    private String state;
+    private String result;
 
     public static PageResult of(IPage batches) {
         PageResult pageResult = new PageResult();
@@ -21,9 +21,9 @@ public class PageResult<R> {
             pageResult.pageSize = batches.getSize();
             pageResult.total = batches.getTotal();
             pageResult.a = batches.getPages();
-            pageResult.state = "1";
+            pageResult.result = "1";
         }else{
-            pageResult.state = "-1";
+            pageResult.result = "-1";
         }
         return pageResult;
     }

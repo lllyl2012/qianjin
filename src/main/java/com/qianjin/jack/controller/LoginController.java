@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
 /**
  * @author volume
@@ -36,7 +38,8 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public Result login(String username, String password) throws UnsupportedEncodingException {
+    public Result login(HttpServletRequest request, String username, String password) throws UnsupportedEncodingException {
+        Map<String, String[]> aa = request.getParameterMap();
         QueryWrapper<UserInfo> wrapper = new QueryWrapper<>();
         wrapper.eq("username", username);
         wrapper.eq("password", DigestUtils.md5DigestAsHex(password.getBytes()));
