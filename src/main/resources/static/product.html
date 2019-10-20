@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>auditUsers</title>
+    <style lang="less">
+        #audit {
+            margin-top: 20px;
+        }
+
+        .status-picker {
+            display: inline-block;
+        }
+
+        .status-picker select {
+            border-radius: 5px;
+            width: 200px;
+            float: left;
+            height: 37px;
+            margin-bottom: -13px;
+            border: 1px solid rgba(34, 36, 38, .15);
+            padding: 0 10px;
+        }
+
+        .jtp {
+            margin-top: 10px;
+        }
+
+        .jtp .ui.icon.input input {
+            padding: 0.5em!important;
+            width: 32px;
+        }
+        .modal .content {
+            display: flex!important;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.6/semantic.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.6/semantic.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.2/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="//cdn.bootcss.com/qs/6.5.2/qs.min.js"></script>
+</head>
+
+<body>
+<div id="audit">
+    <div class="container">
+        <table class="ui compact celled definition table">
+            <thead>
+            <tr>
+                <th></th>
+                <th>产品编号</th>
+                <th>产品名称</th>
+                <th>创建时间</th>
+                <th>二维码</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="product in products" @click="showModel">
+                <td class="collapsing">
+                    <div class="ui toggle slider checkbox" v-if="aKey!==''">
+                        <input type="checkbox" :value="user" v-model="selectedUsers"> <label></label>
+                    </div>
+                </td>
+                <td>{{ product.productCode }}</td>
+                <td>{{ product.productName }}</td>
+                <td>{{ product.createTime }}</td>
+                <td> <img  v-bind:src="'http://localhost:8080/qj/common/photo'+product.qrCode" alt="" width="100px" height="100px"/></td>
+
+            </tr>
+            </tbody>
+            <tfoot class="full-width">
+            </tfoot>
+        </table>
+        <div class="ui basic test modal">
+            <div class="ui items">
+                <div class="item">
+                    <div class="image">
+                        <img src="" alt="" class="photo">
+                    </div>
+                    <div class="content" style="background-color: #fff">
+                        <a class="header">{{ selectedUser.name }}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    let token = localStorage.getItem('yy_token')
+    var mockUsers = []
+    var STORAGE_KEY = 'products';
+    var userStorage = {
+        fetch: function () {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY)) || mockUsers
+        },
+        save: function (data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+        }
+    };
+    const vm = new Vue({
+        name: 'audit',
+        el: '#audit',
+        data () {
+            return {
+                products: userStorage.fetch(), // users 数据
+                selectedUsers: [], // 保存选中的 users 数组
+                selectedUser: {}, // 选中 user
+                fKey: '', // 过滤 name 的关键字
+                name: '', // 上一次过滤的 name 关键字，初始化为''
+                aKey: '', // select audit 的关键字
+                audit: '', // 上一次过滤的 audit关键字，初始化为''
+                limit: 10, // 每页显示行数
+                totalPage: 10, // 总页数
+                currentPage: 1, // 当前页
+                jPage: 1 // 跳转到某页
+            }
+        },
+        // watch
+        watch: {
+            products: {
+                handler () {
+                    userStorage.save(this.products)
+                },
+                deep: true
+            }
+        },
+        // computed properties
+        computed: {
+            filteredUsers () {
+                let fUsers = this.queryFilter('unid', this.fKey, this.products)
+                fUsers = this.queryFilter('ifDelete', this.aKey, fUsers)
+                return this.paginate(fUsers)
+            }
+        },
+        methods: {
+            addUser () {
+                this.products.push(this.user)
+            },
+            queryFilter (prop, key, arr) {
+                // none query string, return arr
+                if (!key) {
+                    return arr
+                }
+                // filtering
+                arr = arr.filter((user) => {
+                    if (user[prop].toString().indexOf(key) !== -1) {
+                    return true
+                }
+            })
+                // if it's a new filter query, research and turn to page one
+                if (key !== this[prop]) {
+                    this.currentPage = 0
+                    // save last filter query
+                    this[prop] = key
+                }
+                return arr
+            },
+            paginate (arr) {
+                // totalPage
+                this.totalPage = Math.ceil(arr.length / this.limit)
+                let page = this.currentPage
+                let curLimit = this.limit
+                // 返回指定条数的数组
+                arr = arr.slice(curLimit * page, curLimit * (page + 1))
+                return arr
+            },
+            setAuditId (users, aId) {
+                users.forEach((user) => {
+                    user.audit = aId
+                })
+            },
+            showModel (e) {
+                let target = e.target
+                if (target.nodeName.toLowerCase() === 'td'){
+                    $('.ui.modal').modal('show')
+                }
+                let index = $(target.parentNode).index()
+                this.selectedUser = this.filteredUsers[index]
+            }
+        },
+        mounted () {
+            _this = this
+            requestPage(_this,0)
+        }
+    })
+
+    function requestPage(_this,page){
+        axios
+            .post('/qj/product/product/list', window.Qs.stringify({
+                search:'batch_unid',
+                keyword:getUrlParam('batchUnid')// 参数 lastName
+            }),{
+                headers: {
+                    'Authorization': token,
+                    'content-type': 'application/x-www-form-urlencoded; charset=utf-8'
+                }
+            })
+            .then(function(res) {
+                var resData = res.data;
+                if(resData.result == "1") { //0表示成功，1表示失败
+                    _this.products = resData.data
+                    console.log(resData.data)
+                }else{
+                    console.log(resData)
+                    alert("账号或密码错误");
+                }
+            })
+            .catch(function (error) { // 请求失败处理
+                console.log(error)
+            });
+    }
+
+
+    function getUrlParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+        var r = window.location.search.substr(1).match(reg); //匹配目标参数
+        if(r != null){
+            return decodeURIComponent(r[2]);
+//这里为什么是从第三个字符解析呢？不知道这样理解对不对，因为路径后面的参数形式为参数名=参数值，而第一个字符为参数名，第二个为=，第三个就为参数值了。。。因为下面调用的时候得出的就是参数值
+        }
+        return null;//返回参数值
+    }
+
+</script>
+
+</body>
+
+</html>

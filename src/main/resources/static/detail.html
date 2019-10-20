@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>auditUsers</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.6/semantic.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.6/semantic.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.2/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="//cdn.bootcss.com/qs/6.5.2/qs.min.js"></script>
+</head>
+
+<body>
+<div id="audit">
+    批次编号<p>{{batchUnid}}</p>
+    产品名称<p>{{productName}}</p>
+    产品编号<p>{{productCode}}</p>
+    创建时间<p>{{createTime}}</p>
+    发货时间<p>{{arriveTime}}</p>
+</div>
+
+
+<script>
+    const vm = new Vue({
+        name: 'audit',
+        el: '#audit',
+        data () {
+            return {
+                batchUnid: '', // users 数据
+                productName: '', // 保存选中的 users 数组
+                createTime: '', // 选中 user
+                productCode: '', // 过滤 name 的关键字
+                arriveTime: ''
+            }
+        },
+        mounted () {
+            _this = this
+            requestPage(_this,0)
+        }
+    })
+
+    function requestPage(_this,page){
+        axios
+            .get('/qj/product/detail/product?unid='+getUrlParam('unid'))
+            .then(function(res) {
+                var resData = res.data;
+                if(resData.result == "1") { //0表示成功，1表示失败
+                    _this.batchUnid = resData.data.batchUnid
+                    _this.productName = resData.data.productName
+                    _this.createTime = resData.data.createTime
+                    _this.productCode = resData.data.productCode
+                    _this.arriveTime = resData.data.arriveTime
+                }else{
+                    console.log(resData)
+                }
+            })
+            .catch(function (error) { // 请求失败处理
+                console.log(error)
+            });
+    }
+
+
+    function getUrlParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+        var r = window.location.search.substr(1).match(reg); //匹配目标参数
+        if(r != null){
+            return decodeURIComponent(r[2]);
+//这里为什么是从第三个字符解析呢？不知道这样理解对不对，因为路径后面的参数形式为参数名=参数值，而第一个字符为参数名，第二个为=，第三个就为参数值了。。。因为下面调用的时候得出的就是参数值
+        }
+        return null;//返回参数值
+    }
+
+</script>
+
+</body>
+
+</html>

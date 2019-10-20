@@ -3,6 +3,7 @@ package com.qianjin.jack.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -25,9 +26,15 @@ public class CommonService {
     }
 
     public String getFileName(String unid){
-        LocalDate localDate = LocalDate.of(2019,1,1);
+        LocalDate localDate = LocalDate.now();
         String fileName = "/"+localDate.format(DateTimeFormatter.ISO_DATE)+unid;
         return fileName.replaceAll("-","");
     }
 
+    public String parseFileName(String photo) {
+        String year = photo.substring(0,4);
+        String month = photo.substring(4,6);
+        String day = photo.substring(6,8);
+        return "/dimensionCode"+File.separator+photo+".jpg";
+    }
 }

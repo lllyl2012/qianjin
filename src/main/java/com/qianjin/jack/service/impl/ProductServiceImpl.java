@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.qianjin.jack.domain.DTO.Search;
 import com.qianjin.jack.domain.PageResult;
+import com.qianjin.jack.domain.Result;
 import com.qianjin.jack.domain.dao.JackBatch;
 import com.qianjin.jack.domain.dao.JackProduct;
 import com.qianjin.jack.mapper.JackBatchMapper;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -44,11 +46,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public PageResult productList(Search search) {
+    public Result productList(Search search) {
         QueryWrapper<JackProduct> wrapper = SqlUtil.getWrapper(search,JackProduct.class);
-        Page<JackProduct> page = new Page<>(search.getPage(),search.getPageSize());
-        IPage<JackProduct> batches = productMapper.selectPage(page,wrapper);
-        return PageResult.of(batches);
+        List<JackProduct> batches = productMapper.selectList(wrapper);
+        return Result.of(batches);
     }
 
     @Override
@@ -67,7 +68,7 @@ public class ProductServiceImpl implements ProductService {
             product.setProductName("千斤顶");
             String imagePath = commonService.getRootPath() + "/";
             String imageName = commonService.getFileName(productUnid+".jpg");
-            QRCodeUtil.encode(batch.getUrl()+"/product/detail/product?unid="+productUnid,"",imagePath+"/dimensionCode"+imageName+".jpg",false);
+            QRCodeUtil.encode(batch.getUrl()+"/manage/detail.html?unid="+productUnid,"",imagePath+"/dimensionCode"+imageName,false);
             product.setQrCode(imageName);
             productMapper.insert(product);
         }
@@ -76,13 +77,18 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public String sellBatch(String unid) {
-        LocalDateTime localDateTime = LocalDateTime.now();
-        UpdateWrapper<JackProduct> wrapper = new UpdateWrapper<>();
+        UpdateWrapper<JackBatch> wrapper = new UpdateWrapper<>();
+        wrapper.eq("unid",unid);
+        JackBatch batch = new JackBatch();
+        batch.setArriveTime(LocalDateTime.now());
+        batchMapper.update(batch,wrapper);
+
+        UpdateWrapper<JackProduct> productUpdateWrapper = new UpdateWrapper<>();
         wrapper.eq("batch_unid",unid);
         JackProduct product = new JackProduct();
-        product.setCreateTime(localDateTime);
-        product.setArriveTime(localDateTime);
-        productMapper.update(product,wrapper);
+        product.setArriveTime(LocalDateTime.now());
+        product.setBatchUnid(unid);
+        productMapper.update(product,productUpdateWrapper);
         return "ok";
     }
 

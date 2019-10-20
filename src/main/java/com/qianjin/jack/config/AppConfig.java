@@ -1,5 +1,6 @@
 package com.qianjin.jack.config;
 
+import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
 import com.qianjin.jack.handler.LoginIntercept;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -51,6 +52,7 @@ public class AppConfig implements WebMvcConfigurer {
         nologin.add("/user/register");
         nologin.add("/product/detail/product");
         nologin.add("/manage/**");
+        nologin.add("/common/**");
         registry.addInterceptor(loginIntercept).addPathPatterns("/**").excludePathPatterns(nologin);
     }
 
@@ -58,5 +60,15 @@ public class AppConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/manage/**").addResourceLocations("classpath:/static/");
+    }
+
+    /**
+     * 分页插件
+     */
+    @Bean
+    public PaginationInterceptor paginationInterceptor() {
+        PaginationInterceptor paginationInterceptor = new PaginationInterceptor();
+        // paginationInterceptor.setLimit(你的最大单页限制数量，默认 500 条，小于 0 如 -1 不受限制);
+        return paginationInterceptor;
     }
 }

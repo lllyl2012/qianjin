@@ -34,7 +34,7 @@ public class ProductController {
      * 产品列表,根据批次
      */
     @PostMapping("/product/list")
-    public PageResult productList(Search search){
+    public Result productList(Search search){
         return productService.productList(search);
     }
 

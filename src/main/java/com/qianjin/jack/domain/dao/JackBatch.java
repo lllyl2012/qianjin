@@ -19,6 +19,8 @@ public class JackBatch {
   private String clientPhone;
   private String clientCompany;
   private String qualityLength;
+  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  private LocalDateTime arriveTime;
 
 
   @TableField(exist = false)
