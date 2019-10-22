@@ -93,6 +93,9 @@
 
 <script>
     let token = localStorage.getItem('yy_token')
+    if(!token){
+        window.location.href = "/qj/manage/login.html"
+    }
     var mockUsers = []
     var STORAGE_KEY = 'products';
     var userStorage = {

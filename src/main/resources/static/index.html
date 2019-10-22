@@ -149,6 +149,9 @@
 
 <script>
     let token = localStorage.getItem('yy_token')
+    if(!token){
+        window.location.href = "/qj/manage/login.html"
+    }
     var mockUsers = []
     var STORAGE_KEY = 'users';
     var userStorage = {
@@ -256,7 +259,7 @@
                     this.currentPage = jPage
                 }
                 _this = this
-                requestPage(_this)
+                requestPage(_this,currentPage)
             },
             doAudit (newAudit, user) {
                 // user 可指定，为 0 时指选中用户，为 -1 时指全部用户
