@@ -43,6 +43,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.2/vue.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="//cdn.bootcss.com/qs/6.5.2/qs.min.js"></script>
+    <script src="./js/date.js"></script>
 </head>
 
 <body>
@@ -75,6 +76,7 @@
                 <th>批次编号</th>
                 <th>创建时间</th>
                 <th>到货时间</th>
+                <th>保修时长</th>
                 <th>操作</th>
             </tr>
             </thead>
@@ -88,6 +90,7 @@
                 <td>{{ user.unid }}</td>
                 <td>{{ user.createTime }}</td>
                 <td>{{ user.arriveTime }}</td>
+                <td>{{ user.qualityLength }}</td>
                 <!--<td>-->
                     <!--<i class="radio black icon" v-if="user.audit==0"></i>-->
                     <!--<i class="minus blue icon" v-if="user.audit==1"></i>-->
@@ -96,7 +99,7 @@
                 <!--</td>-->
                 <td>
                     <button class="ui button primary"  @click="detail(user)">查看</button>
-                    <button class="ui button green" v-if="user.ifDelete==0" @click="doAudit(2, user)">删除</button>
+                    <button class="ui button green" v-if="user.ifDelete==0" @click="deleteBatch(user)">删除</button>
                     <button class="ui button red" @click="setTime(user)">发货</button>
                     <!--<button class="ui button grey" v-if="user.audit==2 || user.audit==3" @click="doAudit(1, user)">再次审核</button>-->
                 </td>
@@ -117,7 +120,7 @@
                     <button class="ui button left labeled icon" @click="turnPage(-1)">
                         <i class="left arrow icon"></i> Prev
                     </button>
-                    <span>共 {{ totalPage }} 页，当前第 {{ currentPage+1 }} 页</span>
+                    <span>共 {{ totalPage }} 页，当前第 {{ currentPage }} 页</span>
                     <button class="ui button right labeled icon" @click="turnPage(1)">
                         <i class="right arrow icon"></i> Next
                     </button>
@@ -150,7 +153,7 @@
 <script>
     let token = localStorage.getItem('yy_token')
     if(!token){
-        window.location.href = "/qj/manage/login.html"
+        window.location.href = "/qianjin/manage/login.html"
     }
     var mockUsers = []
     var STORAGE_KEY = 'users';
@@ -178,7 +181,7 @@
                 audit: '', // 上一次过滤的 audit关键字，初始化为''
                 limit: 10, // 每页显示行数
                 totalPage: 10, // 总页数
-                currentPage: 1, // 当前页
+                currentPage: 0, // 当前页
                 jPage: 1 // 跳转到某页
             }
         },
@@ -200,6 +203,10 @@
             }
         },
         methods: {
+            deleteBatch(user){
+                deleteBatch(user)
+            }
+            ,
             addProduct(){
                 addProd(this.addNum,this.quality)
             },
@@ -301,13 +308,38 @@
         }
     })
 
+    function deleteBatch(user){
+        axios
+            .post('/qianjin/product/delete/batch', window.Qs.stringify({
+                batchId:user.unid
+            }),{
+                headers: {
+                    'Authorization': token,
+                    'content-type': 'application/x-www-form-urlencoded; charset=utf-8'
+                }
+            })
+            .then(function(res) {
+                var resData = res.data;
+                if(resData.result == "1") { //0表示成功，1表示失败
+                    _this.products = resData.data
+                    location.reload()
+                }else{
+                    console.log(resData)
+                    alert("账号或密码错误");
+                }
+            })
+            .catch(function (error) { // 请求失败处理
+                console.log(error)
+            });
+    }
+
     function detailAjax(user){
-        window.location.href = '/qj/manage/product.html?batchUnid='+user.unid
+        window.location.href = '/qianjin/manage/product.html?batchUnid='+user.unid
     }
 
     function setTimeAjax(batch){
         axios
-            .post('/qj/product/sell/batch', window.Qs.stringify({
+            .post('/qianjin/product/sell/batch', window.Qs.stringify({
                 unid:batch.unid
             }),{
                 headers: {
@@ -319,7 +351,7 @@
                 var resData = res.data;
                 if(resData.result == "1") { //0表示成功，1表示失败
                     _this.products = resData.data
-                    console.log(resData.data)
+                    location.reload()
                 }else{
                     console.log(resData)
                     alert("账号或密码错误");
@@ -332,7 +364,7 @@
 
     function requestPage(_this,page){
         axios
-            .post('/qj/product/batch/list', window.Qs.stringify({
+            .post('/qianjin/product/batch/list', window.Qs.stringify({
                 page: page,        // 参数 firstName
                 pageSize: '20'    // 参数 lastName
             }),{
@@ -345,7 +377,7 @@
                 var resData = res.data;
                 if(resData.result == "1") { //0表示成功，1表示失败
                     _this.users = resData.data
-                    console.log(resData.data)
+                    _this.currentPage = resData.page
                 }else{
                     console.log(resData)
                     alert("账号或密码错误");
@@ -358,10 +390,10 @@
 
     function addProd(num,quanlityLen){
         axios
-            .post('/qj/product/insert/product', window.Qs.stringify({
-                quanlityLength: quanlityLen,        // 参数 firstName
+            .post('/qianjin/product/insert/product', window.Qs.stringify({
+                qualityLength: quanlityLen,        // 参数 firstName
                 productNum:num,
-                url:'http://192.168.1.110:8080/qj'
+                url:'http://'+location.host+'/qianjin'
             }),{
                 headers: {
                     'Authorization': token,
@@ -372,6 +404,7 @@
                 var resData = res.data;
                 if(resData.result == "1") { //0表示成功，1表示失败
                     _this.users = resData.data
+                    location.reload()
                     console.log(resData.data)
                 }else{
                     console.log(resData)
@@ -382,6 +415,7 @@
                 console.log(error)
             });
     }
+
 </script>
 
 </body>

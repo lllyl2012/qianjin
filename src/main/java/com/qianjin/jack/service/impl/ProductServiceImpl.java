@@ -40,6 +40,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public PageResult batchList(Search search) {
         QueryWrapper<JackBatch> wrapper = SqlUtil.getWrapper(search,JackBatch.class);
+        wrapper.eq("if_delete", "0");
         Page<JackBatch> page = new Page<>(search.getPage(),search.getPageSize());
         IPage<JackBatch> batches = batchMapper.selectPage(page,wrapper);
         return PageResult.of(batches);
@@ -70,6 +71,7 @@ public class ProductServiceImpl implements ProductService {
             String imageName = commonService.getFileName(productUnid+".jpg");
             QRCodeUtil.encode(batch.getUrl()+"/manage/detail.html?unid="+productUnid,"",imagePath+"/dimensionCode"+imageName,false);
             product.setQrCode(imageName);
+            product.setQualityLength(batch.getQualityLength());
             productMapper.insert(product);
         }
         return "ok";
@@ -90,6 +92,17 @@ public class ProductServiceImpl implements ProductService {
         product.setBatchUnid(unid);
         productMapper.update(product,productUpdateWrapper);
         return "ok";
+    }
+
+    @Override
+    public Result deleteBatch(String batchId) {
+        JackBatch batch = new JackBatch();
+        batch.setIfDelete("1");
+
+        QueryWrapper<JackBatch> wrapper = new QueryWrapper<>();
+        wrapper.eq("unid",batchId);
+        batchMapper.update(batch,wrapper);
+        return Result.of("ok");
     }
 
     @Override

@@ -17,8 +17,8 @@
     <h1>批次编号:</h1><h1>{{batchUnid}}</h1>
     <h1>产品名称:</h1><h1>{{productName}}</h1>
     <h1>产品编号:</h1><h1>{{productCode}}</h1>
-    <h1>创建时间:</h1><h1>{{createTime}}</h1>
     <h1>发货时间:</h1><h1>{{arriveTime}}</h1>
+    <h1>保修时长:</h1><h1>{{qualityLength}}</h1>
 </div>
 
 
@@ -32,7 +32,8 @@
                 productName: '', // 保存选中的 users 数组
                 createTime: '', // 选中 user
                 productCode: '', // 过滤 name 的关键字
-                arriveTime: ''
+                arriveTime: '',
+                qualityLength:''
             }
         },
         mounted () {
@@ -43,7 +44,7 @@
 
     function requestPage(_this,page){
         axios
-            .get('/qj/product/detail/product?unid='+getUrlParam('unid'))
+            .get('/qianjin/product/detail/product?unid='+getUrlParam('unid'))
             .then(function(res) {
                 var resData = res.data;
                 if(resData.result == "1") { //0表示成功，1表示失败
@@ -52,6 +53,7 @@
                     _this.createTime = resData.data.createTime
                     _this.productCode = resData.data.productCode
                     _this.arriveTime = resData.data.arriveTime
+                    _this.qualityLength = resData.data.qualityLength
                 }else{
                     console.log(resData)
                 }

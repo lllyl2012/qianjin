@@ -60,8 +60,8 @@ public class ProductController {
      * 删除商品,删除批次，或者删除其中一个
      */
     @PostMapping("/delete/batch")
-    public Result deleteProduct(String unid,Integer id){
-        return null;
+    public Result deleteBatch(String batchId){
+        return productService.deleteBatch(batchId);
     }
 
     /**

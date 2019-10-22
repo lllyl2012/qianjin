@@ -11,7 +11,7 @@
 <div id="app">
     账号：<input type="text" name="username"  v-model="username" >
     密码：<input type="password" name="password"  v-model="password" >
-    <button @click="getApiData">点击得到数据</button>
+    <button @click="getApiData">登录</button>
 </div>
 <script>
     Vue.prototype.$http = axios;
@@ -27,7 +27,7 @@
         methods:{
             getApiData:function() {
                 //设置请求路径
-                var url  = "/qj/user/login";
+                var url  = "/qianjin/user/login";
                 _this = this;
                 // 得到name属性对应的值
                 this.$http.post(url,window.Qs.stringify({"username":this.username,"password":this.password}),
@@ -40,7 +40,7 @@
                     var resData = res.data;
                     if(resData.result == "1") { //0表示成功，1表示失败
                         localStorage.setItem('yy_token',resData.data)
-                        window.location.href = "/qj/manage/index.html"
+                        window.location.href = "/qianjin/manage/index.html"
                     }else{
                         alert("账号或密码错误");
                     }

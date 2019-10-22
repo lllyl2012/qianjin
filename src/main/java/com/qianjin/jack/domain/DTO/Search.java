@@ -6,6 +6,6 @@ import lombok.Data;
 public class Search {
     private String search;
     private String keyword;
-    private Integer page;
+    private Integer page = 0;
     private Integer pageSize;
 }

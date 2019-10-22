@@ -18,4 +18,6 @@ public interface ProductService {
     JackProduct detailProduct(String id);
 
     String sellBatch(String unid);
+
+    Result deleteBatch(String batchId);
 }

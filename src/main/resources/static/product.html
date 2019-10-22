@@ -68,7 +68,7 @@
                 <td>{{ product.productCode }}</td>
                 <td>{{ product.productName }}</td>
                 <td>{{ product.createTime }}</td>
-                <td> <img  v-bind:src="'http://localhost:8080/qj/common/photo'+product.qrCode" alt="" width="100px" height="100px"/></td>
+                <td> <img  v-bind:src="'/qianjin/common/photo'+product.qrCode" alt="" width="100px" height="100px"/></td>
 
             </tr>
             </tbody>
@@ -94,7 +94,7 @@
 <script>
     let token = localStorage.getItem('yy_token')
     if(!token){
-        window.location.href = "/qj/manage/login.html"
+        window.location.href = "/qianjin/manage/login.html"
     }
     var mockUsers = []
     var STORAGE_KEY = 'products';
@@ -195,7 +195,7 @@
 
     function requestPage(_this,page){
         axios
-            .post('/qj/product/product/list', window.Qs.stringify({
+            .post('/qianjin/product/product/list', window.Qs.stringify({
                 search:'batch_unid',
                 keyword:getUrlParam('batchUnid')// 参数 lastName
             }),{
